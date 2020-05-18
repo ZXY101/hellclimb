@@ -6,7 +6,6 @@ func _ready():
 	add_state("jump")
 	add_state("fall")
 	call_deferred("set_state", states.idle)
-	print(state)
 
 func _input(event):
 	if [states.idle, states.run].has(state):
@@ -28,12 +27,12 @@ func _input(event):
 		if event.is_action_released("jump") && parent.velocity.y < parent.min_jump_velocity:
 			parent.velocity.y = parent.min_jump_velocity
 
-func _state_logic(delta):
+func _state_logic(_delta):
 	parent._handle_move_input()
-	parent._apply_gravity(delta)
+	parent._apply_gravity(_delta)
 	parent._apply_movement()
 
-func _get_transition(delta):
+func _get_transition(_delta):
 	match (state):
 		states.idle:
 			if (!parent.is_on_floor()):
@@ -41,7 +40,7 @@ func _get_transition(delta):
 					return states.jump
 				elif (parent.velocity.y >= 0):
 					return states.fall
-			elif (parent.velocity.x != 0):
+			elif (abs(parent.velocity.x) >= 25):
 				return states.run
 		states.run:
 			if (!parent.is_on_floor()):
@@ -49,9 +48,8 @@ func _get_transition(delta):
 					return states.jump
 				elif (parent.velocity.y >= 0):
 					return states.fall
-			elif (parent.velocity.x == 0):
-				return 
-				states.idle
+			elif (abs(parent.velocity.x) < 25):
+				return states.idle
 		states.jump:
 			if (parent.is_on_floor()):
 				return states.idle
@@ -65,7 +63,7 @@ func _get_transition(delta):
 	
 	return null
 
-func _enter_state(new_state, old_state):
+func _enter_state(new_state, _old_state):
 	match new_state:
 		states.idle:
 			parent.sprite.animation = "idle"
@@ -76,5 +74,5 @@ func _enter_state(new_state, old_state):
 		states.fall:
 			parent.sprite.animation = "fall"
 
-func _exit_state(old_state, new_state):
+func _exit_state(_old_state, _new_state):
 	pass

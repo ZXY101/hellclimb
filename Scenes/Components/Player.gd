@@ -62,7 +62,7 @@ var min_jump_velocity
 var is_grounded
 var is_jumping = false
 
-var max_jump_height = 2.25 * Globals.UNIT_SIZE
+var max_jump_height = 2.5 * Globals.UNIT_SIZE
 var min_jump_height = 0.8 * Globals.UNIT_SIZE
 var jump_duration = 0.5
 
@@ -82,7 +82,7 @@ func _apply_movement():
 		is_jumping = false
 	
 	#Snap to the floor if not jumping
-	var snap = Vector2.DOWN * 32 if !is_jumping else Vector2.ZERO
+	var snap = Vector2.DOWN * 16 if !is_jumping else Vector2.ZERO
 	
 	# Move player
 	velocity = move_and_slide_with_snap(velocity, snap, UP)
