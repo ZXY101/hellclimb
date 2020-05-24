@@ -5,4 +5,5 @@
 [node name="TileMap" type="TileMap"]
 tile_set = ExtResource( 1 )
 cell_size = Vector2( 32, 32 )
+collision_layer = 514
 format = 1

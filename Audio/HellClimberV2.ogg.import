@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/HellClimberV2.ogg-126fdf26e96a619d2d5ff8e505135100.oggstr"
+
+[deps]
+
+source_file="res://Audio/HellClimberV2.ogg"
+dest_files=[ "res://.import/HellClimberV2.ogg-126fdf26e96a619d2d5ff8e505135100.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0
