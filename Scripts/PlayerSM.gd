@@ -12,9 +12,10 @@ func _init_states():
 	add_state("wall_slide")
 
 func _input(event):
-	if [states.idle, states.run].has(state):
+	if [states.idle, states.run].has(state) || !parent.coyote_timer.is_stopped():
 		# JUMP
 		if (event.is_action_pressed("jump")):
+			parent.coyote_timer.stop()
 			# If holding down and grounded, drop through
 			if Input.is_action_pressed("down"):
 				# Check on-way raycasts to prevent getting stuck on solid ground
@@ -89,23 +90,38 @@ func _enter_state(new_state, _old_state):
 	match new_state:
 		states.idle:
 			parent.sprite.animation = "idle"
+			print('idle')
 		states.run:
+			print('run')
 			parent.sprite.animation = "run"
+			parent.play_sfx("walk")
 		states.jump:
+			print('jump')
 			parent.sprite.animation = "jump"
+			parent.play_sfx("jump")
 		states.fall:
-			parent.sprite.animation = "fall"
+			print('fall')
+			if (parent.coyote_timer.is_stopped()):
+				parent.sprite.animation = "fall"
+			if ([states.idle, states.run].has(_old_state)):
+				parent.coyote_timer.start()
+				parent.velocity.y = 0
 		states.wall_slide:
+			print('wall_slide')
 			parent.sprite.animation = "wall_slide"
 			parent.sprite.scale.x = -parent.wall_direction
+			parent.play_sfx("land")
 
 func _exit_state(_old_state, _new_state):
 	match _old_state:
 		states.wall_slide:
 			parent.wall_slide_cooldown.start()
+		states.fall:
+			parent.play_sfx("land")
+		states.run:
+			parent.play_sfx()
 
 
 func _on_WallSlideStickyTimer_timeout():
 	if (state == states.wall_slide):
-		print("whatftf")
 		set_state(states.fall)

@@ -9,14 +9,18 @@ onready var left_wall_raycasts = $WallRaycasts/LeftWallRaycasts
 onready var right_wall_raycasts = $WallRaycasts/RightWallRaycasts
 onready var wall_slide_cooldown = $WallSlideCooldown
 onready var wall_slide_sticky_timer = $WallSlideStickyTimer
+onready var jump_player = $AudioStreamPlayers/JumpASP
+onready var land_player = $AudioStreamPlayers/LandASP
+onready var walk_player = $AudioStreamPlayers/WalkASP
+onready var coyote_timer = $CoyoteTimer
 
 const UP = Vector2(0, -1)
 const SLOPE_STOP = 64
 const DROP_THRU_BIT = 1
-const WALL_JUMP_VELOCITY = Vector2(300, -300)
+const WALL_JUMP_VELOCITY = Vector2(300, -500)
 
 var velocity = Vector2()
-var move_speed = 5 * Globals.UNIT_SIZE
+var move_speed = 6 * Globals.UNIT_SIZE
 var gravity
 var max_jump_velocity
 var min_jump_velocity
@@ -26,9 +30,13 @@ var move_direction = 1
 var is_grounded
 var is_jumping = false
 
-var max_jump_height = 2.5 * Globals.UNIT_SIZE
-var min_jump_height = 0.8 * Globals.UNIT_SIZE
+var max_jump_height = 4 * Globals.UNIT_SIZE
+var min_jump_height = 0.5 * Globals.UNIT_SIZE
 var jump_duration = 0.5
+
+var jump_sfx = load('res://Audio/Jump.wav')
+var walk_sfx = load('res://Audio/Walk.wav')
+var land_sfx = load('res://Audio/Land.wav')
 
 func _ready():
 	gravity = 2 * max_jump_height / pow(jump_duration, 2)
@@ -36,8 +44,9 @@ func _ready():
 	min_jump_velocity = -sqrt(2 * gravity * min_jump_height)
 
 func _apply_gravity(delta):
-	# Apply gravity
-	velocity.y += gravity * delta
+	if (coyote_timer.is_stopped()):
+		# Apply gravity
+		velocity.y += gravity * delta
 	
 
 func _cap_gravity_wall_slide():
@@ -74,13 +83,12 @@ func _handle_move_input():
 func _handle_wall_slide_sticky():
 	if (move_direction != 0 && move_direction != wall_direction):
 		if (wall_slide_sticky_timer.is_stopped()):
-			print('nani')
 			wall_slide_sticky_timer.start()
 	else:
 		wall_slide_sticky_timer.stop()
 
 func get_h_weight():
-	if (is_on_floor()):
+	if (is_on_floor() || !coyote_timer.is_stopped()):
 		return 0.2
 	else:
 		if (move_direction == 0):
@@ -88,7 +96,7 @@ func get_h_weight():
 		elif (move_direction == sign(velocity.x) && abs(velocity.x) > move_speed):
 			return 0.0
 		else:
-			return 0.1
+			return 0.05
 
 func _wall_jump():
 	var wall_jump_velocity = WALL_JUMP_VELOCITY
@@ -117,6 +125,18 @@ func _check_is_valid_wall(wall_raycasts):
 			if (dot > PI * 0.35 && dot < PI * 0.55):
 				return true
 	return false
+	
+func play_sfx(sound = ''):
+	match sound:
+		'jump':
+			jump_player.play()
+			
+		'land':
+			land_player.play()
+		'walk':
+			walk_player.play()
+		_:
+			walk_player.stop()
 
 func _on_Area2D_body_exited(_body):
 	set_collision_mask_bit(DROP_THRU_BIT, true)
